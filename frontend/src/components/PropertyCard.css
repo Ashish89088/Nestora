@@ -1,0 +1,59 @@
+.property-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.property-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.property-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.property-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.property-description {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.property-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.property-price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c7be5;
+}
+
+.property-type {
+  font-size: 12px;
+  background-color: #eef4ff;
+  color: #2c7be5;
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.property-location {
+  font-size: 13px;
+  color: #777;
+  margin-top: 6px;
+}
