@@ -3,6 +3,8 @@ import {
   createProperty,
   getAllProperties,
   getOwnerProperties,
+  updateProperty,
+  deleteProperty,
 } from "./property.controller.js";
 
 import {
@@ -29,6 +31,22 @@ router.post(
   authenticate,
   authorize("owner"),
   createProperty
+);
+
+// UPDATE PROPERTY
+router.put(
+  "/:id",
+  authenticate,
+  authorize("owner"),
+  updateProperty
+);
+
+// DELETE PROPERTY
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("owner"),
+  deleteProperty
 );
 
 export default router;

@@ -40,3 +40,16 @@ export const loginService = async (email, password) => {
 
   return { user, token };
 };
+
+export const getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

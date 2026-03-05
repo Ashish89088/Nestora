@@ -113,7 +113,7 @@ function Signup() {
       localStorage.setItem("token", token);
 
       alert("Signup successful");
-      navigate("/dashboard");
+      navigate("/");
     } catch (error) {
       alert("Signup failed");
     }

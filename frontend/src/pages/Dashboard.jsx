@@ -1,152 +1,9 @@
-// import { useEffect, useState } from "react";
-// import { getOwnerProperties } from "../services/propertyService";
-
-// function Dashboard() {
-//   const [properties, setProperties] = useState([]);
-//   const [page, setPage] = useState(1);
-//   const [limit] = useState(5); // Number of properties per page
-//   const [totalPages, setTotalPages] = useState(1);
-
-//   useEffect(() => {
-//     fetchOwnerProperties(page);
-//   }, [page]);
-
-//   const fetchOwnerProperties = async (page) => {
-//     try {
-//       const res = await getOwnerProperties(page, limit);
-
-//       // Assuming backend returns { data: [...], totalPages: n }
-//       setProperties(res.data || res); // adjust if your backend wraps data differently
-//       if (res.totalPages) setTotalPages(res.totalPages);
-//     } catch (error) {
-//       console.error(error);
-//       alert("Unauthorized or failed to fetch properties");
-//     }
-//   };
-
-//   const handlePrev = () => {
-//     if (page > 1) setPage(page - 1);
-//   };
-
-//   const handleNext = () => {
-//     if (page < totalPages) setPage(page + 1);
-//   };
-
-//   return (
-//     <div>
-//       <h2>My Properties</h2>
-
-//       {properties.length === 0 && <p>No properties found.</p>}
-
-//       {properties.map((p) => (
-//         <div
-//           key={p._id}
-//           style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}
-//         >
-//           <h3>{p.title}</h3>
-//           <p>Price: ${p.price}</p>
-//         </div>
-//       ))}
-
-//       {/* Pagination Controls */}
-//       <div style={{ marginTop: "20px" }}>
-//         <button onClick={handlePrev} disabled={page === 1}>
-//           Prev
-//         </button>
-//         <span style={{ margin: "0 10px" }}>
-//           Page {page} of {totalPages}
-//         </span>
-//         <button onClick={handleNext} disabled={page === totalPages}>
-//           Next
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default Dashboard;
-
-
-// import { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { getOwnerProperties } from "../services/propertyService";
-
-// function Dashboard() {
-//   const navigate = useNavigate();
-
-//   const [properties, setProperties] = useState([]);
-//   const [page, setPage] = useState(1);
-//   const [limit] = useState(5);
-//   const [totalPages, setTotalPages] = useState(1);
-
-//   useEffect(() => {
-//     fetchOwnerProperties(page);
-//   }, [page]);
-
-//   const fetchOwnerProperties = async (page) => {
-//     try {
-//       const res = await getOwnerProperties(page, limit);
-
-//       setProperties(res.data || res);
-//       if (res.totalPages) setTotalPages(res.totalPages);
-//     } catch (error) {
-//       console.error(error);
-//       alert("Unauthorized or failed to fetch properties");
-//     }
-//   };
-
-//   const handlePrev = () => {
-//     if (page > 1) setPage(page - 1);
-//   };
-
-//   const handleNext = () => {
-//     if (page < totalPages) setPage(page + 1);
-//   };
-
-//   return (
-//     <div>
-//       <h2>My Properties</h2>
-
-//       {/* ✅ Add Property Button */}
-//       <button onClick={() => navigate("/add-property")}>
-//         Add Property
-//       </button>
-
-//       {properties.length === 0 && <p>No properties found.</p>}
-
-//       {properties.map((p) => (
-//         <div
-//           key={p._id}
-//           style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}
-//         >
-//           <h3>{p.title}</h3>
-//           <p>Price: ${p.price}</p>
-//         </div>
-//       ))}
-
-//       {/* Pagination */}
-//       <div style={{ marginTop: "20px" }}>
-//         <button onClick={handlePrev} disabled={page === 1}>
-//           Prev
-//         </button>
-//         <span style={{ margin: "0 10px" }}>
-//           Page {page} of {totalPages}
-//         </span>
-//         <button onClick={handleNext} disabled={page === totalPages}>
-//           Next
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default Dashboard;
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getOwnerProperties } from "../services/propertyService";
+import { getOwnerProperties, deleteProperty } from "../services/propertyService";
 import PropertyCard from "../components/PropertyCard";
 import "./Dashboard.css";
+import { getCurrentUser } from "../services/authService";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -155,9 +12,11 @@ function Dashboard() {
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     fetchOwnerProperties(page);
+    fetchUser();
   }, [page]);
 
   const fetchOwnerProperties = async (page) => {
@@ -172,8 +31,54 @@ function Dashboard() {
     }
   };
 
+  const fetchUser = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await getCurrentUser();
+
+      console.log('current user is '+JSON.stringify(res));
+      setUser(res.data.data);
+      if(res.data.data.role == "owner") {
+        navigate("/dashboard");
+      }
+      
+    } catch (error) {
+      console.log("Not logged in");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this property?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await deleteProperty(id);
+      fetchOwnerProperties(page);
+    } catch (error) {
+      alert("Failed to delete property");
+    }
+  };
+
+  const handleEdit = (property) => {
+    navigate(`/edit-property/${property._id}`, {
+      state: property,
+    });
+  };
+
   return (
+
     <div className="dashboard-container">
+      {/* Show Username */}
+      {user && (
+        <h2 style={{ marginBottom: "10px" }}>
+          Welcome, {user.name}
+        </h2>
+      )}
       <div className="dashboard-header">
         <h2>My Properties</h2>
 
@@ -191,7 +96,13 @@ function Dashboard() {
 
       <div className="property-grid">
         {properties.map((property) => (
-          <PropertyCard key={property._id} property={property} />
+          <PropertyCard
+            key={property._id}
+            property={property}
+            isOwnerView={true}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         ))}
       </div>
 

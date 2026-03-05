@@ -86,9 +86,11 @@ function Login() {
 
       localStorage.setItem("token", token);
 
-      alert("Login successful");
+      console.log("Login successful");
       navigate("/dashboard");
+      // navigate("/");
     } catch (error) {
+      console.log(error);
       alert("Login failed");
     }
   };

@@ -12,11 +12,6 @@ export const createPropertyService = async (data, ownerId) => {
 export const getAllPropertiesService = async (page = 1, limit = 10) => {
   const skip = (page - 1) * limit;
 
-  // const properties = await Property.find({ isActive: true })
-  //   .skip(skip)
-  //   .limit(limit)
-  //   .lean();
-
   const [properties, total] = await Promise.all([
     Property.find({ isActive: true })
       .skip(skip)
@@ -35,8 +30,6 @@ export const getAllPropertiesService = async (page = 1, limit = 10) => {
       totalPages: Math.ceil(total / limit),
     },
   };
-
-  // return properties;
 };
 
 export const getOwnerPropertiesService = async (
@@ -64,4 +57,25 @@ export const getOwnerPropertiesService = async (
       totalPages: Math.ceil(total / limit),
     },
   };
+};
+
+// UPDATE
+export const updatePropertyService = async (id, data, ownerId) => {
+  const property = await Property.findOneAndUpdate(
+    { _id: id, ownerId }, // ensures only owner can update
+    data,
+    { new: true }
+  );
+
+  return property;
+};
+
+// DELETE
+export const deletePropertyService = async (id, ownerId) => {
+  const property = await Property.findOneAndDelete({
+    _id: id,
+    ownerId, // ensures only owner can delete
+  });
+
+  return property;
 };
